@@ -5,9 +5,8 @@
   tasks:
   - name: copy MariaDB 
     copy: src=db/MariaDB.repo dest=/etc/yum.repos.d/MariaDB.repo mode=0744
-    become: yes  
-  - name: update the MariaDB
-    apt: name=MariaDB-server, MariaDB-client update_cache=yes state=present
+  - name: install mariadb
+    yum: name=MariaDB-server, MariaDB-client update_cache=yes state=present
     become: yes
     service: name=mariadb state=started enabled=yes
   - name: Install mariadb_answers into a text file and give it permissions
