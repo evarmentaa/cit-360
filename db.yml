@@ -4,20 +4,26 @@
    db_password: password
   tasks:
   - name: copy MariaDB 
-    copy: src=db/MariaDB.repo dest=/etc/yum.repos.d/MariaDB.repo mode=0744
+    copy: src=db/mariadb_answers.txt dest=/etc/MariaDB.repo mode=0644 
+    
   - name: install mariadb
-    yum: name=MariaDB-server, MariaDB-client update_cache=yes state=present
+    command: yum name=MariaDB-server, MariaDB-client update_cache=yes state=present
     become: yes
+    
+  - name: start   
     service: name=mariadb state=started enabled=yes
+    
   - name: Install mariadb_answers into a text file and give it permissions
     template: src=db/mariadb_answers.txt dest=/tmp/mariadb_answers.txt mode=0644
     become: yes
+    
   - name: imports text file  
     shell: /usr/bin/mysql_secure_installation < /tmp/mariadb_answers.txt
+    
   - name: Unarchive module  
     unarchive: src=db/db.tgz dest=~/ mode=0644
-  - name: command comdule creates database
-    command: ./make_databases.sh {{ db_password }} localhost chdir=~/db
-  - name: Ignore errors  
+    
+  - name: command module creates database
+    command: yum ./make_databases.sh {{ db_password }} localhost chdir=~/db
     ignore_errors: True 
     
