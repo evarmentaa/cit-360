@@ -2,26 +2,32 @@
 - hosts: db
   vars: 
    db_password: password
+   dbserver_pkg: maridb-server
+   dbinstalldir: /db/MariaDB.repo
   tasks:
-  - name: copy MariaDB 
-    copy: src=db/mariadb_answers.txt dest=/etc/MariaDB.repo mode=0644 
+  - name: install mariadb server 
+    yum: pkg=MariaDB-server state=present
+    become: yes
+  - name: install client 
+    yum: pkg=mariadb state=latest  
     
-  - name: install mariadb
-    command: yum name=MariaDB-server, MariaDB-client update_cache=yes state=present
+  - name: copy MariaDB 
+    copy: src=db/MariaDB.repo dest=db/mariadb_answers.txt owner=root group=root mode=0755 
     become: yes
     
-  - name: start   
+  - name: start sql service and enable it   
     service: name=mariadb state=started enabled=yes
     
-  - name: Install mariadb_answers into a text file and give it permissions
+  - name: Store passwords 
     template: src=db/mariadb_answers.txt dest=/tmp/mariadb_answers.txt mode=0644
     become: yes
     
-  - name: imports text file  
-    shell: /usr/bin/mysql_secure_installation < /tmp/mariadb_answers.txt
+  - name: imports sql file  
+    shell: mysql -u root -p password dbname < /var/lib/mysql.sql
+    register: result
     
   - name: Unarchive module  
-    unarchive: src=db/db.tgz dest=~/ mode=0644
+    unarchive: src=db/db.tgz dest=/home/unarchive mode=0644
     
   - name: command module creates database
     command: yum ./make_databases.sh {{ db_password }} localhost chdir=~/db
