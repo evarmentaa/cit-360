@@ -45,7 +45,7 @@
       register: vhost_conf
 
 #problem
-    - name: Templates 
+    - name: Templates  
       become: yes
       template: src=web/php.ini.j2 dest=/etc/php.ini mode=0644
       register: php_conf
