@@ -50,7 +50,7 @@
       template: src=web/php.ini.j2 dest=/etc/php.ini mode=0644
       register: php_conf
 #fine
-    - name:Copy module from source to destination 
+    - name: Copy module from source to destination 
       become: yes
       copy: src=web/php-fpm-web.conf dest=/etc/php-fpm.d/www.conf mode=0644
       register: php_fpm_conf
