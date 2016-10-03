@@ -50,7 +50,7 @@
       template: src=web/php.ini.j2 dest=/etc/php.ini mode=0644
       register: php_conf
 #fine
-    - name:
+    - name:Copy module from source to destination 
       become: yes
       copy: src=web/php-fpm-web.conf dest=/etc/php-fpm.d/www.conf mode=0644
       register: php_fpm_conf
@@ -66,23 +66,23 @@
       service: name=php-fpm state=restarted enabled=yes
       when: nginx_install|changed or php_conf|changed or php_fpm_conf|changed
 
-    - name:
+    - name: Sets attributes of files
       become: yes
       file: path="{{ service_dir }}" state=directory
 
-    - name:
+    - name: unzips an archive after copying from local machine
       become: yes
       unarchive: src=web/{{ service_name }}.tgz dest="{{ service_dir }}" mode=0755
 
-    - name:
+    - name: Installs composer 
       become: yes
       command: /usr/local/bin/composer update chdir={{ service_dir }}
 
-    - name:
+    - name: Changes permissions 
       become: yes
       command: chmod -R 0777 storage chdir="{{ service_dir }}"
 
-    - name: 
+    - name: Changes permissions
       become: yes
       command: chown -R nginx:nginx . chdir="{{ service_dir }}"
 
