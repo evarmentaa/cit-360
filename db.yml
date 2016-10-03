@@ -1,8 +1,11 @@
 ---
 - hosts: db
-  vars:
-    db_password: password
+  vars: 
+   db_password: password
+   dbserver_pkg: maridb-server
+   dbinstalldir: /db/MariaDB.repo
   tasks:
+
     # Need a become yes because writing to /etc needs root permissions
     - name:  Copy module that copies the local host on to remote host
       become: yes
