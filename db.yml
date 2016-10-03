@@ -1,8 +1,11 @@
 ---
 - hosts: db
-  vars:
-    db_password: password
+  vars: 
+   db_password: password
+   dbserver_pkg: maridb-server
+   dbinstalldir: /db/MariaDB.repo
   tasks:
+<<<<<<< HEAD
     # Need a become yes because writing to /etc needs root permissions
     - name:  Copy module that copies the local host on to remote host
       become: yes
@@ -29,3 +32,33 @@
     - name: Run database comand, inject the db_password on to localhost
       command: ./make_databases.sh {{ db_password }} localhost chdir=~/db
       ignore_errors: True
+=======
+  - name: install mariadb server 
+    yum: pkg=MariaDB-server state=present
+    become: yes
+  - name: install client 
+    yum: pkg=mariadb state=latest  
+    
+  - name: copy MariaDB 
+    copy: src=db/MariaDB.repo dest=db/mariadb_answers.txt owner=root group=root mode=0755 
+    become: yes
+    
+  - name: start sql service and enable it   
+    service: name=mariadb state=started enabled=yes
+    
+  - name: Store passwords 
+    template: src=db/mariadb_answers.txt dest=/tmp/mariadb_answers.txt mode=0644
+    become: yes
+    
+  - name: imports sql file  
+    shell: mysql -u root -p password dbname < /var/lib/mysql.sql
+    register: result
+    
+  - name: Unarchive module  
+    unarchive: src=db/db.tgz dest=/home/unarchive mode=0644
+    
+  - name: command module creates database
+    command: yum ./make_databases.sh {{ db_password }} localhost chdir=~/db
+    ignore_errors: True 
+    
+>>>>>>> cd1cb480fdffcd5e521581d78b86a29388d65b7b
