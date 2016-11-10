@@ -60,7 +60,6 @@ resource "aws_subnet" "public_subnet_a" {
     vpc_id = "${var.vpc_id}"
     #giving it 256 addresses
     cidr_block = "172.32.1.0/24"
-<<<<<<< HEAD
     availability_zone = "us-west-2a"
 
     tags {
@@ -99,46 +98,6 @@ resource "aws_subnet" "private_subnet_a" {
     }
 }
 
-=======
-    availability_zone = "us-west-2a"
-
-    tags {
-        Name = "public_subneta"
-    }
-}
-
-resource "aws_subnet" "public_subnet_b" {
-    vpc_id = "${var.vpc_id}"
-    cidr_block = "172.32.2.0/24"
-    availability_zone = "us-west-2b"
-
-    tags {
-        Name = "public_subnetb"
-    }
-}
-
-resource "aws_subnet" "public_subnet_c" {
-    vpc_id = "${var.vpc_id}"
-    cidr_block = "172.32.3.0/24"
-    availability_zone = "us-west-2c"
-
-    tags {
-        Name = "public_subnetc"
-    }
-}
-
-########## Creates 3 private subnets ############
-resource "aws_subnet" "private_subnet_a" {
-    vpc_id = "${var.vpc_id}"
-    cidr_block = "172.32.16.0/22"
-    availability_zone = "us-west-2a"
-
-    tags {
-        Name = "private_a"
-    }
-}
-
->>>>>>> 900d5d602393293eab65340c13a1b0f2283f042f
 resource "aws_subnet" "private_subnet_b" {
     vpc_id = "${var.vpc_id}"
     cidr_block = "172.32.20.0/22"
@@ -202,8 +161,3 @@ resource "aws_security_group" "bastion" {
 
 	vpc_id = "${var.vpc_id}"
 }
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 900d5d602393293eab65340c13a1b0f2283f042f
