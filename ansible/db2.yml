@@ -1,0 +1,23 @@
+---
+- hosts: db
+  vars:
+    db_password: password
+  tasks:
+    - name:  Copy module that copies the local host on to remote host
+      become: yes
+      copy: src=db/MariaDB.repo dest=/etc/yum.repos.d/MariaDB.repo mode=0644
+    
+    - name: install MariaDB  
+      become: yes
+      yum: name=MariaDB-client update_cache=yes state=present
+      
+    - name: Unzips package from remote to host machine 
+      unarchive: src=db/db.tgz dest=~/ mode=0700
+
+    - name: Run database comand, inject the db_password on to localhost
+      command: ./make_databases.sh {{ db_password }} localhost chdir=~/db
+      ignore_errors: True
+
+    - name: Step 7
+      command: ./make_databases.sh {{ db_password }} i-luv-devops.cxlsnpf2csir.us-west-2.rds.amazonaws.com chdir=~/db
+      ignore_errors: True
