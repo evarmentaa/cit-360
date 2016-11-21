@@ -20,5 +20,5 @@
       ignore_errors: True
 
     - name: Step 7
-      command: ./make_databases.sh {{ db_password }} i-luv-devops.cxlsnpf2csir.us-west-2.rds.amazonaws.com chdir=~/db
+      command: ./make_databases.sh {{ db_password }} chdir=~/db
       ignore_errors: True
