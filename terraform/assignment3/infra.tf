@@ -255,9 +255,9 @@ resource "aws_security_group" "elb_security" {
 	name = "securityelb"
 	description = "Security group for the ELB that allows incoming ssh traffic"
 	ingress {
-		from_port = 22
-		to_port = 22
-		protocol = "0"
+		from_port = 80
+		to_port = 80
+		protocol = "tcp"
 		cidr_blocks = ["0.0.0.0/0"]
 	}
 	
@@ -269,7 +269,7 @@ resource "aws_security_group" "elb_security" {
   }
 
 
-	vpc_id = "${var.vpc_id}"
+#	vpc_id = "${var.vpc_id}"
 }
 
 
@@ -302,6 +302,8 @@ resource "aws_elb" "elb" {
   idle_timeout = 400
   connection_draining = true
   connection_draining_timeout = 60
+  security_groups = ["${aws_security_group.elb_security.id}"]
+
 
   tags {
     Name = "terraform_ELB"

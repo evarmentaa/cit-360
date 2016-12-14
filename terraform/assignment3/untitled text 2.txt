@@ -1,0 +1,130 @@
+---
+- hosts: web
+  vars:
+    server_name: curriculum
+    service_name: curriculum
+    service_version: 1.0
+    app_env: test
+    db_host: tf-20161213222823545614863pko.ceym2bf0akjd.us-west-2.rds.amazonaws.com
+    db_database: curriculum
+    db_password: password
+    db_username: username
+    db_port: 3306
+    service_dir: /usr/share/nginx/{{ service_name }}  
+    
+    tasks:
+  - name: Install the epel repo
+    become: yes
+    package: 
+      name: epel-release 
+      update_cache: yes 
+      state: present
+
+  - name: Install nginx, php
+    become: yes
+    package: 
+      name: nginx,php,php-fpm,php-ldap,php-mbstring,php-mcrypt,php-mysql,php-phpunit-PHPUnit 
+      update_cache: yes 
+      state: present
+    register: nginx_install
+   
+  - name: Download Composer
+    become: yes
+    get_url: 
+      url: https://getcomposer.org/installer
+      dest: /tmp/installer 
+      mode: 0755
+
+  - name: Install Composer 
+    become: yes
+    shell: cat /tmp/installer | php -- --install-dir=/usr/local/bin
+    args:
+      creates: /usr/local/bin/composer
+
+  - name: Rename Composer
+    become: yes
+    shell: mv /usr/local/bin/composer.phar /usr/local/bin/composer
+    args:
+      creates: /usr/local/bin/composer 
+  
+  - name: Change permissions of Composer
+    file:
+      path: /usr/local/bin/composer
+      mode: a+x
+      state: file
+ 
+  - name: Copy over nginx config 
+    become: yes
+    copy: 
+      src: web/nginx.conf 
+      dest: /etc/nginx/nginx.conf 
+      mode: 0000
+    register: nginx_conf
+
+  - name: Config the nginx vhost
+    become: yes
+    template: 
+      src: web/vhost.conf.j2 
+      dest: /etc/nginx/conf.d/{{ service_name }}.conf 
+      mode: 0644
+    register: vhost_conf
+
+  - name: Config php
+    become: true
+    template: 
+      src: web/php.ini.j2 
+      dest: /etc/php.ini 
+      mode: 0644
+    register: php_conf
+
+  - name: Copy php-fpm-web config
+    become: yes
+    copy: 
+      src: web/php-fpm-web.conf 
+      dest: /etc/php-fpm.d/www.conf 
+      mode: 0644
+    register: php_fpm_conf
+
+  - name: Restart nginx 
+    become: yes
+    service: 
+      name: nginx 
+      state: restarted 
+      enabled: yes
+    when: nginx_install|changed or nginx_conf|changed or vhost_conf|changed
+
+  - name: Restart php-fpm
+    become: true
+    service: name=php-fpm state=restarted enabled=yes
+    when: nginx_install|changed or php_conf|changed or php_fpm_conf|changed
+
+  - name: Create service directory for curriculum
+    become: yes
+    file: path={{ service_dir }}/ state=directory
+
+  - name: Unarchive website configuration files
+    become: yes
+    unarchive: src=web/{{ service_name }}.tgz dest={{ service_dir }} mode=0755
+
+  - name: Use composer to update the nginx files
+    become: yes
+    command: /usr/local/bin/composer update chdir={{ service_dir }}
+  
+  - name: Create a storage directory 
+    become: yes
+    file: 
+      path: "{{ service_dir }}/storage" 
+      state: directory 
+      mode: 0777
+
+  - name: change group and owner of nginx directory
+    become: true
+    file: path={{ service_dir }} group=nginx owner=nginx state=directory recurse=yes
+
+  - name: Set up the web environment
+    become: yes
+    template: 
+      src: web/env.j2 
+      dest: "{{ service_dir }}/.env" 
+      mode: 0644 
+      owner: nginx
