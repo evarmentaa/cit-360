@@ -15,6 +15,11 @@ resource "aws_internet_gateway" "gw" {
 }
 
 ################ Create NAT gateway ##########
+resource "aws_eip" "nat" {
+  vpc = true
+}
+
+
 resource "aws_nat_gateway" "nat" {
   allocation_id = "${aws_eip.lb.id}"
   subnet_id = "${aws_subnet.private_subnet_a.id}"
