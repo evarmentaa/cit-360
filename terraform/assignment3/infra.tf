@@ -317,7 +317,7 @@ resource "aws_elb" "elb" {
 
 ######## 2 instances ###############
 resource "aws_instance" "instance_1" {
-    ami = "ami-5ec1673e"
+    ami = "ami-d2c924b2"
     associate_public_ip_address = false
     subnet_id = "${aws_subnet.private_subnet_b.id}"
     instance_type = "t2.micro"
@@ -330,7 +330,7 @@ resource "aws_instance" "instance_1" {
 }
 
 resource "aws_instance" "instance_2" {
-    ami = "ami-5ec1673e"
+    ami = "ami-d2c924b2"
     associate_public_ip_address = false
     subnet_id = "${aws_subnet.private_subnet_c.id}"
     instance_type = "t2.micro"
