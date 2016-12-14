@@ -57,11 +57,6 @@
        path: /usr/local/bin/composer
        mode: a+x
        state: file
-      
-    - name:  Installs nginx conf & registers it 
-      become: yes
-      copy: src=~/cit-360/ansible/web/nginx.conf dest=/etc/nginx/nginx.conf mode=0000
-      register: nginx_conf
 
     - name: Configure vhost_conf 
       become: yes
@@ -97,7 +92,7 @@
 
     - name: Copy module that copies from the nginx source to /etc 
       become: yes
-      copy: src=web/nginx.conf dest=/etc/nginx/nginx.conf mode=0640
+      copy: src=~/cit-360/ansible/web/nginx.conf dest=/etc/nginx/nginx.conf mode=0640
       register: nginx_conf
 
 
@@ -120,31 +115,19 @@
     - name: Sets attributes of files
       become: yes
       file: path="{{ service_dir }}" state=directory
-
-    - name: Unzips an archive after copying from local machine
-      become: yes
-      unarchive: src=web/{{ service_name }}.tgz dest="{{ service_dir }}" mode=0755
      
-    - name: Unpacks web stuff from the service directory
+    - name: Unzips web files from the service directory
       become: yes
       unarchive: src=~/cit-360/ansible/web/{{ service_name }}.tgz dest="{{ service_dir }}"  mode=0755      
 
-    - name: Installs composer 
+    - name: Updates service_dir 
       become: yes
       command: /usr/local/bin/composer update chdir={{ service_dir }}
 
-    - name: Changes permissions 
-      become: yes
-      command: chmod -R 0777 storage chdir="{{ service_dir }}"
-
-    - name:  change permissions
+    - name:  Change permissions
       become: yes
       file: recurse=yes path={{ service_dir }}/storage mode=0777
 
-    - name: Template that injects service_dir 
-      become: yes
-      template: src=web/env.j2 dest="{{ service_dir }}/.env" mode=0644 owner=nginx
-      
     - name: Installs the template so website is viewable 
       become: yes
       template: src=~/cit-360/ansible/web/env.j2 dest="{{ service_dir }}/.env" mode=0644 owner=nginx
