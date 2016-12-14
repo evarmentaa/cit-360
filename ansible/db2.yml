@@ -3,17 +3,33 @@
   vars:
     db_password: password
   tasks:
+
+    - name: Include the secret file that contains db password 
+      include_vars: secret.yml  
+    # Need a become yes because writing to /etc needs root permissions
     - name:  Copy module that copies the local host on to remote host
       become: yes
       copy: src=db/MariaDB.repo dest=/etc/yum.repos.d/MariaDB.repo mode=0644
     
     - name: install MariaDB  
       become: yes
-      yum: name=MariaDB-client update_cache=yes state=present
-      
+      yum: name=MariaDB-server,MariaDB-client update_cache=yes state=present
+
+#    - name: Starts MariaDB on boot
+#      become: yes
+#      service: name=mariadb state=started enabled=yes
+#    - name: Template that injects variable data into Mariadb file
+#      template: src=db/mariadb_answers.txt dest=/tmp/mariadb_answers.txt mode=0644
+#
+#    - name: Reads MariaDB.txt file and redirects it to mysql_secure_installation
+#      become: yes
+#      shell: /usr/bin/mysql_secure_installation </tmp/mariadb_answers.txt
+
     - name: Unzips package from remote to host machine 
-      unarchive: src=db/db.tgz dest=~/ mode=0700
+      unarchive: src=db/db.tgz dest=~/ mode=0755
 
     - name: Run database comand, inject the db_password on to localhost
-      command: ./make_databases.sh {{ db_password }} http://terraform-elb-308563777.us-west-2.elb.amazonaws.com/ chdir=~/db
+      command: ./make_databases.sh {{ db_password }} f-20161213222823545614863pko.ceym2bf0akjd.us-west-2.rds.amazonaws.com:3306 chdir=~/db
       ignore_errors: True
+      
+      
