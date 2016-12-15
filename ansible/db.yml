@@ -1,9 +1,7 @@
 ---
 - hosts: db
   tasks:
-    - name: Include Secret
-      include_vars: secret.yml
-
+    - include_vars: secret.yml
     - name: Copy DB
       become: yes
       copy: src=~/cit-360/ansible/db/MariaDB.repo dest=/etc/yum.repos.d/MariaDB.repo mode=0644
