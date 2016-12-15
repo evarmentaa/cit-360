@@ -11,10 +11,10 @@
     db_port: 3306
     service_dir: /usr/share/nginx/{{ service_name }}
   tasks:
-    - name: Include Secret
+    - name: Include Secret 
       include_vars: secret.yml
 
-    - name: Yum epel-release
+    - name: Install epel-release
       become: yes
       yum: name=epel-release update_cache=yes state=present
 
@@ -22,7 +22,7 @@
       become: yes
       shell: yes | yum install php54 php54-fpm php54-ldap php54-mbstring php54-mcrypt php54-pdo
 
-    - name: nginx
+    - name: Install nginx
       become: yes
       yum: name=nginx update_cache=yes state=present
       register: nginx_install
@@ -38,7 +38,7 @@
       become: yes
       shell: php /usr/local/bin/composer --install-dir=/usr/local/bin --filename=composer
 
-    - name:  nginx2
+    - name: configure nginx
       become: yes
       copy: src=~/cit-360/ansible/web/nginx.conf dest=/etc/nginx/nginx.conf mode=0000
       register: nginx_conf
@@ -48,7 +48,7 @@
       template: src=~/cit-360/ansible/web/vhost.conf.j2 dest=/etc/nginx/conf.d/{{ service_name }}.conf mode=0644
       register: vhost_conf
 
-    - name: register php_conf
+    - name: register php conf
       become: yes
       template: src=~/cit-360/ansible/web/php.ini.j2 dest=/etc/php.ini mode=0644
       register: php_conf
@@ -68,27 +68,27 @@
       service: name=php-fpm state=restarted enabled=yes
       when: nginx_install|changed or php_conf|changed or php_fpm_conf|changed
 
-    - name: directory
+    - name: directory path file
       become: yes
       file: path="{{ service_dir }}" state=directory
 
-    - name: unpack 
+    - name: unzip  
       become: yes
       unarchive: src=~/cit-360/ansible/web/{{ service_name }}.tgz dest="{{ service_dir }}" mode=0755
 
-    - name: Composer
+    - name: updates composer
       become: yes
       command: /usr/local/bin/composer update chdir={{ service_dir }}
       ignore_errors: True     
 
-    - name: permissions
+    - name: Gives read, write, execute permission
       become: yes
       file: recurse=yes path={{ service_dir }}/storage mode=0777
 
-    - name: Permission nginx
+    - name: Permission for nginx
       become: yes
       file: recurse=yes path={{ service_dir }} owner=nginx group=nginx
 
-    - name: Template
+    - name: web template
       become: yes
       template: src=~/cit-360/ansible/web/env.j2 dest="{{ service_dir }}/.env" mode=0644 owner=nginx
