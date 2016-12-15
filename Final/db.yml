@@ -1,0 +1,20 @@
+---
+- hosts: db
+  tasks:
+    - include_vars: secret.yml
+    - name: Copy MariaDB
+      become: yes
+      copy: src=~/cit-360/ansible/db/MariaDB.repo dest=/etc/yum.repos.d/MariaDB.repo mode=0644
+           
+    - name: Install MariaDB client
+      become: yes
+      package: name=MariaDB-client update_cache=yes state=present
+     
+    - name: Unzip the db.tgz
+      become: yes
+      unarchive: src=db/db.tgz dest=~/ mode=0777
+       
+    - name: inject db_password
+      become: yes
+      command: ./make_databases.sh "{{ db_password }}" tf-20161214235901012718526smb.ceym2bf0akjd.us-west-2.rds.amazonaws.com chdir=~/db
+      ignore_errors: True
